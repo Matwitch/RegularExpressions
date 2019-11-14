@@ -54,5 +54,5 @@ RE_Graph::RE_Graph(const std::string& reg_expr)
 
 	v[N - 1].c = '\0';
 
-	parse_re();
+	parse_re(reg_expr);
 }
