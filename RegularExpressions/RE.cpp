@@ -31,17 +31,36 @@ void RE_Graph::parse_re(const std::string& reg_expr)
 {
 	std::stack<int> stack;
 
-	for (int i = 0; i < reg_expr.length(); ++i)
+	for (int i = 0, lp = 0; i < reg_expr.length(); ++i)
 	{
 		if (reg_expr.at(i) == '(' || reg_expr.at(i) == '|')
 			stack.push(i);
-
 		else if (reg_expr.at(i) == ')')
 		{
-			//
+			lp = stack.top();
+			stack.pop();
+			if (v[lp].c == '|')
+			{
+				int beg = stack.top();
+				stack.pop();
+				addEdge(beg, lp + 1);
+				addEdge(lp, i);
+				lp = beg;
+			}
 		}
 
+		if (reg_expr.at(i) == '*')
+		{
+			addEdge(lp, i);
+			addEdge(i, lp);
+		} 
+		else if (reg_expr.at(i) == '+')
+			addEdge(i, lp);
 
+		if (reg_expr.at(i) == '(' || reg_expr.at(i) == '*' || reg_expr.at(i) == '+' || reg_expr.at(i) == ')')
+			addEdge(i, i + 1);
+
+		lp = i;
 	}
 }
 
