@@ -1,11 +1,13 @@
 #include "RE.h"
 #include <stack>
 #include <iostream>
+#include <queue>
 #include <forward_list>
 
 RE_Graph* RE::nfa = nullptr;
+bool* RE_Graph::marked = nullptr;
 
-void RE_Graph::Node::add(Node* n)
+void RE_Graph::Node::add(int n)
 {
 	adj[k++] = n;
 }
@@ -27,12 +29,29 @@ RE_Graph::Node::Itr RE_Graph::Node::end()
 void RE_Graph::addEdge(int a, int b)
 {
 	if (a < N && b < N)
-		v[a].add(&v[b]);
+		v[a].add(b);
 	else throw;
 }
 
 void RE_Graph::DFS(std::forward_list<int>& new_states, std::forward_list<int>& from_states)
 {
+	std::queue<int> q;
+	for (int i = 0; i < N; ++i)
+		 marked[i] = false;
+
+	for (int t : from_states)
+		q.push(t);
+
+	while (!q.empty())
+	{
+		for (int t : v[q.back()])
+		{
+			q.push(t);
+			new_states.push_front(t);
+			marked[t] = true;
+		}
+		q.pop();
+	}
 }
 
 void RE_Graph::parse_re(const std::string& reg_expr)
@@ -77,6 +96,7 @@ RE_Graph::RE_Graph(const std::string& reg_expr)
 	N = reg_expr.length() + 1;
 	v = new RE_Graph::Node[N];
 	r = reg_expr;
+	marked = new bool[N] { false };
 	for (int i = 0; i < N - 1; i++)
 		v[i].c = reg_expr.at(i);
 
@@ -97,13 +117,24 @@ bool RE::recongines(const std::string& re, std::string txt)
 	std::forward_list<int> match;
 	match.push_front(0);
 	nfa->DFS(possible, match);
+	match.clear();
 
 	for (int i = 0; i < txt.length(); ++i)
 	{
+		if (possible.empty())
+			return false;
 
+		for (int t : possible)
+		{
+			if (nfa->v[t].c == re.at(i) || re.at(i) == '.')
+				match.push_front(t);
+		}
+
+		possible.clear();
+		nfa->DFS(possible, match);
 	}
 
-	return true;
+	return false;
 }
 
 bool RE::recongines(const std::string& re, std::istream st)

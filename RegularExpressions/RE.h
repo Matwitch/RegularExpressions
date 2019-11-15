@@ -28,22 +28,22 @@ private:
 				++i;
 			}
 
-			bool operator==(const Itr& l)
+			bool operator!=(const Itr& l)
 			{
-				return i == l.i;
+				return i != l.i;
 			}
 
-			Node& operator*()
+			int operator*()
 			{
-				return *(n->adj[i]);
+				return n->adj[i];
 			}
 		};
 
 		char c;
-		Node* adj[3] = { nullptr };
+		int adj[3] = { -1 };
 		int k = 0;
 
-		void add(Node* n);
+		void add(int n);
 		bool operator==(const char& cl);
 
 		Itr begin();
@@ -57,7 +57,7 @@ public:
 	void addEdge(int a, int b);
 	void DFS(std::forward_list<int>& new_states, std::forward_list<int>& from_states);
 	void parse_re(const std::string& reg_expr);
-
+	static bool* marked;
 	RE_Graph(const std::string& reg_expr);
 };
 
