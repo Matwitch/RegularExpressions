@@ -37,17 +37,18 @@ void RE_Graph::DFS(std::forward_list<int>& new_states, std::forward_list<int>& f
 {
 	std::queue<int> q;
 	for (int i = 0; i < N; ++i)
-		 marked[i] = false;
+		marked[i] = false;
 
 	for (int t : from_states)
 	{
+		new_states.push_front(t);
 		q.push(t);
 		marked[t] = true;
 	}
 
 	while (!q.empty())
 	{
-		for (int t : v[q.back()])
+		for (int t : v[q.front()])
 		{
 			if (marked[t])
 				continue;
