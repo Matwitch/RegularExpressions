@@ -23,7 +23,7 @@ RE_Graph::Node::Itr RE_Graph::Node::begin()
 }
 RE_Graph::Node::Itr RE_Graph::Node::end()
 {
-	return Itr(this, k + 1);
+	return Itr(this, k);
 }
 
 void RE_Graph::addEdge(int a, int b)
@@ -40,12 +40,18 @@ void RE_Graph::DFS(std::forward_list<int>& new_states, std::forward_list<int>& f
 		 marked[i] = false;
 
 	for (int t : from_states)
+	{
 		q.push(t);
+		marked[t] = true;
+	}
 
 	while (!q.empty())
 	{
 		for (int t : v[q.back()])
 		{
+			if (marked[t])
+				continue;
+
 			q.push(t);
 			new_states.push_front(t);
 			marked[t] = true;
@@ -75,26 +81,28 @@ void RE_Graph::parse_re(const std::string& reg_expr)
 				lp = beg;
 			}
 		}
-
-		if (reg_expr.at(i) == '*')
+		else if (reg_expr.at(i) == '*')
 		{
 			addEdge(lp, i);
 			addEdge(i, lp);
-		} 
+		}
 		else if (reg_expr.at(i) == '+')
 			addEdge(i, lp);
-
+		else
+		{
+			lp = i;
+			continue;
+		}
+		
 		if (reg_expr.at(i) == '(' || reg_expr.at(i) == '*' || reg_expr.at(i) == '+' || reg_expr.at(i) == ')')
 			addEdge(i, i + 1);
-
-		lp = i;
 	}
 }
 
 RE_Graph::RE_Graph(const std::string& reg_expr)
 {
 	N = reg_expr.length() + 1;
-	v = new RE_Graph::Node[N];
+	v = new Node[N];
 	r = reg_expr;
 	marked = new bool[N] { false };
 	for (int i = 0; i < N - 1; i++)
@@ -126,15 +134,16 @@ bool RE::recongines(const std::string& re, std::string txt)
 
 		for (int t : possible)
 		{
-			if (nfa->v[t].c == re.at(i) || re.at(i) == '.')
-				match.push_front(t);
+			if (nfa->v[t].c == txt.at(i) || nfa->v[t].c == '.')
+				match.push_front(t + 1);
 		}
 
 		possible.clear();
 		nfa->DFS(possible, match);
+		match.clear();
 	}
 
-	return false;
+	return nfa->marked[re.length()];
 }
 
 bool RE::recongines(const std::string& re, std::istream st)

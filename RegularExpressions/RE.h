@@ -51,6 +51,12 @@ private:
 	};
 
 public:
+	~RE_Graph()
+	{
+		delete[] marked;
+		delete[] v;
+	}
+
 	Node* v;
 	int N;
 	std::string r;
@@ -65,6 +71,7 @@ public:
 class RE
 {
 	static RE_Graph* nfa;
+public:
 	static bool recongines(const std::string& re, std::string txt);
 	static bool recongines(const std::string& re, std::istream st);
 };
